@@ -13,7 +13,6 @@ const contactSchema = new mongoose.Schema({
   },
 });
 
-// Tworzenie modelu na podstawie schematu
 const Contact = mongoose.model("Contact", contactSchema);
 
 module.exports = Contact;

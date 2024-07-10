@@ -107,7 +107,7 @@ router.patch("/:contactId/favorite", async (req, res, next) => {
     const updatedContact = await Contact.findByIdAndUpdate(
       contactId,
       { favorite },
-      { new: true } // Zwraca zaktualizowany obiekt
+      { new: true }
     );
 
     if (!updatedContact) {
