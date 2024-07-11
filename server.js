@@ -8,6 +8,8 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { DB_HOST: urlDb } = process.env;
+const PORT = process.env.MAIN_PORT;
+
 console.log(urlDb);
 const connection = mongoose.connect(urlDb);
 
@@ -37,8 +39,8 @@ const startServer = async () => {
   try {
     await connection;
     console.log("Database connected");
-    app.listen(8000, () => {
-      console.log("Server started on http://localhost:8000");
+    app.listen(PORT, () => {
+      console.log(`Server started on http://localhost:${PORT}`);
     });
   } catch (err) {
     console.log(err);
