@@ -14,8 +14,9 @@ const contactSchema = Joi.object({
 });
 
 router.get("/contacts/", async (req, res, next) => {
+  const { owner } = req.query;
   try {
-    const contacts = await Contact.find();
+    const contacts = await Contact.find({ owner });
     res.status(200).json(contacts);
   } catch (error) {
     next(error);
