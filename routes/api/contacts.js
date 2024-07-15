@@ -24,8 +24,12 @@ router.get("/contacts/", async (req, res, next) => {
 
 router.get("/contacts/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
+  const { owner } = req.query;
   try {
-    const contact = await Contact.findById(contactId);
+    const contact = await Contact.findOne({
+      _id: contactId,
+      owner,
+    });
     if (!contact) {
       res.status(404).json({ message: "Contact not found." });
       return;
@@ -48,6 +52,7 @@ router.post("/contacts/", async (req, res, next) => {
       email: req.body.email,
       phone: req.body.phone,
       favorite: req.body.favorite || false,
+      owner: req.body.owner,
     });
 
     const savedContact = await newContact.save();
@@ -61,7 +66,10 @@ router.post("/contacts/", async (req, res, next) => {
 router.delete("/contacts/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
   try {
-    const deletedContact = await Contact.findByIdAndDelete(contactId);
+    const deletedContact = await Contact.findOneAndDelete({
+      _id: contactId,
+      owner: req.query.owner,
+    });
     if (!deletedContact) {
       res.status(404).json({ message: "Contact not found." });
       return;
@@ -80,10 +88,12 @@ router.put("/contacts/:contactId", async (req, res, next) => {
       res.status(400).json({ message: "Missing fields." });
       return;
     }
-    const updatedContact = await Contact.findByIdAndUpdate(
-      contactId,
+    const updatedContact = await Contact.findOneAndUpdate(
+      { _id: contactId, owner: req.body.owner },
       req.body,
-      { new: true }
+      {
+        new: true,
+      }
     );
     if (!updatedContact) {
       res.status(404).json({ message: "Not found." });
