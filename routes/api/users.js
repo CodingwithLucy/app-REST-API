@@ -1,15 +1,14 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const Joi = require("joi");
+const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const User = require("../../service/models/user.js");
-const passport = require("passport");
-const { ExtractJwt, Strategy: JwtStrategy } = require("passport-jwt");
 const dotenv = require("dotenv");
+
 dotenv.config();
 
 const router = express.Router();
-const secret = process.env.SECRET;
 
 const userSchema = Joi.object({
   password: Joi.string().min(6).required().messages({
@@ -94,26 +93,6 @@ router.post("/users/login", async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-
-passport.use(
-  new JwtStrategy(
-    {
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: secret,
-    },
-    async (jwtPayload, done) => {
-      try {
-        const user = await User.findById(jwtPayload.user_id);
-        if (!user) {
-          return done(null, false);
-        }
-        return done(null, user);
-      } catch (error) {
-        return done(error, false);
-      }
-    }
-  )
-);
 
 router.get(
   "/users/logout",

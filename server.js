@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const apiRouter = require("./routes/api/contacts.js");
 const usersRouter = require("./routes/api/users.js");
 const dotenv = require("dotenv");
+const JWTStrategy = require("./middleware/passport.js");
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
+
+JWTStrategy();
 
 app.use("/api", usersRouter);
 app.use("/api", apiRouter);
