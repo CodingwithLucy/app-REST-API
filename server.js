@@ -3,6 +3,7 @@ const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const apiRouter = require("./routes/api/contacts.js");
+const usersRouter = require("./routes/api/users.js");
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -21,7 +22,8 @@ app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/contacts", apiRouter);
+app.use("/api", usersRouter);
+app.use("/api", apiRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Not found - ${req.path}` });

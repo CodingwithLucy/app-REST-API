@@ -10,9 +10,10 @@ const contactSchema = Joi.object({
     .pattern(/^\(\d{3}\) \d{3}-\d{4}$/)
     .required(),
   favorite: Joi.boolean(),
+  owner: Joi.string().required(),
 });
 
-router.get("/", async (req, res, next) => {
+router.get("/contacts/", async (req, res, next) => {
   try {
     const contacts = await Contact.find();
     res.status(200).json(contacts);
@@ -21,7 +22,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:contactId", async (req, res, next) => {
+router.get("/contacts/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
   try {
     const contact = await Contact.findById(contactId);
@@ -35,7 +36,7 @@ router.get("/:contactId", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/contacts/", async (req, res, next) => {
   try {
     const { error } = contactSchema.validate(req.body);
     if (error) {
@@ -57,7 +58,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.delete("/:contactId", async (req, res, next) => {
+router.delete("/contacts/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
   try {
     const deletedContact = await Contact.findByIdAndDelete(contactId);
@@ -71,7 +72,7 @@ router.delete("/:contactId", async (req, res, next) => {
   }
 });
 
-router.put("/:contactId", async (req, res, next) => {
+router.put("/contacts/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
   try {
     const { error } = contactSchema.validate(req.body);
@@ -94,7 +95,7 @@ router.put("/:contactId", async (req, res, next) => {
   }
 });
 
-router.patch("/:contactId/favorite", async (req, res, next) => {
+router.patch("/contacts/:contactId/favorite", async (req, res, next) => {
   const { contactId } = req.params;
   const { favorite } = req.body;
 
