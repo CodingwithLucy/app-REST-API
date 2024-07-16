@@ -1,9 +1,10 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const Joi = require("joi");
-const passport = require("passport");
+// const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const User = require("../../service/models/user.js");
+const JwtAuthMiddleware = require("../../middleware/auth.js");
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -94,31 +95,22 @@ router.post("/users/login", async (req, res) => {
   }
 });
 
-router.get(
-  "/users/logout",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    try {
-      req.user.token = null;
-      await req.user.save();
-
-      res.status(204).end();
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Something went wrong" });
-    }
+router.get("/users/logout", JwtAuthMiddleware(), async (req, res) => {
+  try {
+    req.user.token = null;
+    await req.user.save();
+    res.status(204).end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Something went wrong" });
   }
-);
+});
 
-router.get(
-  "/users/current",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    res.status(200).json({
-      email: req.user.email,
-      subscription: req.user.subscription,
-    });
-  }
-);
+router.get("/users/current", JwtAuthMiddleware(), (req, res) => {
+  res.status(200).json({
+    email: req.user.email,
+    subscription: req.user.subscription,
+  });
+});
 
 module.exports = router;
