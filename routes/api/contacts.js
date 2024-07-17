@@ -10,13 +10,12 @@ const contactSchema = Joi.object({
     .pattern(/^\(\d{3}\) \d{3}-\d{4}$/)
     .required(),
   favorite: Joi.boolean(),
-  owner: Joi.string().required(),
+  owner: Joi.string() /* .required() */,
 });
 
 router.get("/contacts/", async (req, res, next) => {
-  const { owner } = req.query;
   try {
-    const contacts = await Contact.find({ owner });
+    const contacts = await Contact.find({ owner: req.user });
     res.status(200).json(contacts);
   } catch (error) {
     next(error);
@@ -25,11 +24,10 @@ router.get("/contacts/", async (req, res, next) => {
 
 router.get("/contacts/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
-  const { owner } = req.query;
   try {
     const contact = await Contact.findOne({
       _id: contactId,
-      owner,
+      owner: req.user,
     });
     if (!contact) {
       res.status(404).json({ message: "Contact not found." });
@@ -53,7 +51,7 @@ router.post("/contacts/", async (req, res, next) => {
       email: req.body.email,
       phone: req.body.phone,
       favorite: req.body.favorite || false,
-      owner: req.body.owner,
+      owner: req.user,
     });
 
     const savedContact = await newContact.save();
@@ -69,7 +67,7 @@ router.delete("/contacts/:contactId", async (req, res, next) => {
   try {
     const deletedContact = await Contact.findOneAndDelete({
       _id: contactId,
-      owner: req.query.owner,
+      owner: req.user,
     });
     if (!deletedContact) {
       res.status(404).json({ message: "Contact not found." });
