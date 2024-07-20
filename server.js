@@ -3,9 +3,10 @@ const passport = require("passport");
 const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+
 const apiRouter = require("./routes/api/contacts.js");
 const usersRouter = require("./routes/api/users.js");
-const dotenv = require("dotenv");
 const JWTStrategy = require("./middleware/passport.js");
 const JwtAuthMiddleware = require("./middleware/auth.js");
 

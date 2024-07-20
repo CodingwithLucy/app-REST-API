@@ -1,7 +1,8 @@
 const express = require("express");
-const router = express.Router();
 const Joi = require("joi");
 const Contact = require("../../service/models/contact.js");
+
+const router = express.Router();
 
 const contactSchema = Joi.object({
   name: Joi.string().required(),

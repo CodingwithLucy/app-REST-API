@@ -1,15 +1,17 @@
+const fs = require("fs");
+const path = require("path");
+
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+const jimp = require("jimp");
+
 const User = require("../../service/models/user.js");
 const JwtAuthMiddleware = require("../../middleware/auth.js");
-const dotenv = require("dotenv");
 const generateAvatarURL = require("../../service/models/avatar.js");
 const upload = require("../../middleware/upload.js");
-const path = require("path");
-const jimp = require("jimp");
-const fs = require("fs");
 
 dotenv.config();
 
