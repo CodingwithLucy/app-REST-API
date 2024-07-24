@@ -1,5 +1,6 @@
 const express = require("express");
 const Joi = require("joi");
+
 const Contact = require("../../service/models/contact.js");
 const JwtAuthMiddleware = require("../../middleware/auth.js");
 

@@ -1,5 +1,6 @@
 const passport = require("passport");
 const { ExtractJwt, Strategy: JwtStrategy } = require("passport-jwt");
+
 const User = require("../service/models/user.js");
 
 function JWTStrategy() {
