@@ -1,5 +1,6 @@
 const bCrypt = require("bcrypt");
 const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid");
 
 const userSchema = new mongoose.Schema({
   password: {
@@ -27,8 +28,15 @@ const userSchema = new mongoose.Schema({
   },
   verificationToken: {
     type: String,
-    required: [true, "Verify token is required"],
+    default: null,
   },
+});
+
+userSchema.pre("save", function (next) {
+  if (!this.verificationToken) {
+    this.verificationToken = uuidv4();
+  }
+  next();
 });
 
 userSchema.methods.setPassword = async function (password) {

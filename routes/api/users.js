@@ -6,7 +6,6 @@ const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
-const { v4: uuidv4 } = require("uuid");
 const jimp = require("jimp");
 
 const User = require("../../service/models/user.js");
@@ -33,16 +32,11 @@ const userSchema = Joi.object({
   token: Joi.string().allow(null).default(null),
   avatarURL: Joi.string().uri().optional(),
   verify: Joi.boolean().default(false),
-  verificationToken: Joi.string().required().messages({
-    "any.required": "Verify token is required",
-  }),
+  verificationToken: Joi.string().optional(),
 });
 
 router.post("/users/register", async (req, res) => {
   try {
-    const verificationToken = uuidv4();
-    req.body.verificationToken = verificationToken;
-
     const { error } = userSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: "Validation error", error });
@@ -65,7 +59,6 @@ router.post("/users/register", async (req, res) => {
       password: hashedPassword,
       subscription: "starter",
       avatarURL,
-      verificationToken,
       verify: false,
     });
 
@@ -75,7 +68,7 @@ router.post("/users/register", async (req, res) => {
       from: `My App <${process.env.MG_FROM_EMAIL}>`,
       to: email,
       subject: "Email Verification",
-      text: `Please verify your email by clicking the following link: http://localhost:8000/api/users/verify/${verificationToken}`,
+      text: `Please verify your email by clicking the following link: http://localhost:8000/api/users/verify/${newUser.verificationToken}`,
     };
 
     mg.messages().send(data, (error, body) => {
@@ -86,11 +79,6 @@ router.post("/users/register", async (req, res) => {
       console.log("Email sent:", body);
       res.status(200).json({ message: "Verification email sent" });
     });
-    /*
-    res
-      .status(201)
-      .json({ user: { email, subscription: newUser.subscription, avatarURL } });
-    */
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Something went wrong" });
