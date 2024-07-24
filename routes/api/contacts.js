@@ -1,6 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const Contact = require("../../service/models/contact.js");
+const JwtAuthMiddleware = require("../../middleware/auth.js");
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ const contactSchema = Joi.object({
   owner: Joi.string() /* .required() */,
 });
 
-router.get("/contacts/", async (req, res, next) => {
+router.get("/contacts/", JwtAuthMiddleware(), async (req, res, next) => {
   try {
     const contacts = await Contact.find({ owner: req.user });
     res.status(200).json(contacts);
@@ -23,24 +24,28 @@ router.get("/contacts/", async (req, res, next) => {
   }
 });
 
-router.get("/contacts/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  try {
-    const contact = await Contact.findOne({
-      _id: contactId,
-      owner: req.user,
-    });
-    if (!contact) {
-      res.status(404).json({ message: "Contact not found." });
-      return;
+router.get(
+  "/contacts/:contactId",
+  JwtAuthMiddleware(),
+  async (req, res, next) => {
+    const { contactId } = req.params;
+    try {
+      const contact = await Contact.findOne({
+        _id: contactId,
+        owner: req.user,
+      });
+      if (!contact) {
+        res.status(404).json({ message: "Contact not found." });
+        return;
+      }
+      res.status(200).json(contact);
+    } catch (error) {
+      next(error);
     }
-    res.status(200).json(contact);
-  } catch (error) {
-    next(error);
   }
-});
+);
 
-router.post("/contacts/", async (req, res, next) => {
+router.post("/contacts/", JwtAuthMiddleware(), async (req, res, next) => {
   try {
     const { error } = contactSchema.validate(req.body);
     if (error) {
@@ -63,72 +68,84 @@ router.post("/contacts/", async (req, res, next) => {
   }
 });
 
-router.delete("/contacts/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  try {
-    const deletedContact = await Contact.findOneAndDelete({
-      _id: contactId,
-      owner: req.user,
-    });
-    if (!deletedContact) {
-      res.status(404).json({ message: "Contact not found." });
-      return;
-    }
-    res.status(200).json({ message: "Contact deleted." });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.put("/contacts/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  try {
-    const { error } = contactSchema.validate(req.body);
-    if (error) {
-      res.status(400).json({ message: "Missing fields." });
-      return;
-    }
-    const updatedContact = await Contact.findOneAndUpdate(
-      { _id: contactId, owner: req.body.owner },
-      req.body,
-      {
-        new: true,
+router.delete(
+  "/contacts/:contactId",
+  JwtAuthMiddleware(),
+  async (req, res, next) => {
+    const { contactId } = req.params;
+    try {
+      const deletedContact = await Contact.findOneAndDelete({
+        _id: contactId,
+        owner: req.user,
+      });
+      if (!deletedContact) {
+        res.status(404).json({ message: "Contact not found." });
+        return;
       }
-    );
-    if (!updatedContact) {
-      res.status(404).json({ message: "Not found." });
-      return;
+      res.status(200).json({ message: "Contact deleted." });
+    } catch (error) {
+      next(error);
     }
-    res.status(200).json(updatedContact);
-  } catch (error) {
-    next(error);
   }
-});
+);
 
-router.patch("/contacts/:contactId/favorite", async (req, res, next) => {
-  const { contactId } = req.params;
-  const { favorite } = req.body;
-
-  try {
-    if (favorite === undefined) {
-      res.status(400).json({ message: "missing field favorite" });
+router.put(
+  "/contacts/:contactId",
+  JwtAuthMiddleware(),
+  async (req, res, next) => {
+    const { contactId } = req.params;
+    try {
+      const { error } = contactSchema.validate(req.body);
+      if (error) {
+        res.status(400).json({ message: "Missing fields." });
+        return;
+      }
+      const updatedContact = await Contact.findOneAndUpdate(
+        { _id: contactId, owner: req.body.owner },
+        req.body,
+        {
+          new: true,
+        }
+      );
+      if (!updatedContact) {
+        res.status(404).json({ message: "Not found." });
+        return;
+      }
+      res.status(200).json(updatedContact);
+    } catch (error) {
+      next(error);
     }
-
-    const updatedContact = await Contact.findByIdAndUpdate(
-      contactId,
-      { favorite },
-      { new: true }
-    );
-
-    if (!updatedContact) {
-      res.status(404).json({ message: "Not found." });
-      return;
-    }
-
-    res.status(200).json(updatedContact);
-  } catch (error) {
-    next(error);
   }
-});
+);
+
+router.patch(
+  "/contacts/:contactId/favorite",
+  JwtAuthMiddleware(),
+  async (req, res, next) => {
+    const { contactId } = req.params;
+    const { favorite } = req.body;
+
+    try {
+      if (favorite === undefined) {
+        res.status(400).json({ message: "missing field favorite" });
+      }
+
+      const updatedContact = await Contact.findByIdAndUpdate(
+        contactId,
+        { favorite },
+        { new: true }
+      );
+
+      if (!updatedContact) {
+        res.status(404).json({ message: "Not found." });
+        return;
+      }
+
+      res.status(200).json(updatedContact);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 module.exports = router;
